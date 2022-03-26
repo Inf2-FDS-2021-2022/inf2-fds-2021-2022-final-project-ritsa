@@ -53,14 +53,12 @@ def cleanData():
     twelvepm = stringToDate('2030-01-01 12:00:00.000').time()
     fourpm = stringToDate('2030-01-01 16:00:00.000').time()
     eightpm = stringToDate('2030-01-01 20:00:00.000').time()
+    
+    master['HourAnswered'] = master['TimeAnswered'].apply(lambda x: x.hour)
 
 
     #Creates an indicator variable about what time of day the question was answered - Welcome to change to whatever time brackets
-    master['WeeHours'] = master['TimeAnswered'].apply(lambda time: time < fouram)
-    master['EarlyMorning'] = master['TimeAnswered'].apply(lambda time: time >= fouram and time < eightam)
-    master['MidMorning'] = master['TimeAnswered'].apply(lambda time: time >= eightam and time < twelvepm)
-    master['Afternoon'] = master['TimeAnswered'].apply(lambda time: time >= twelvepm and time < fourpm)
-    master['Evening'] = master['TimeAnswered'].apply(lambda time: time >= fourpm and time < eightpm)
-    master['Night'] = master['TimeAnswered'].apply(lambda time: time >= eightpm)
+    master['TimeSlot'] = master['HourAnswered'].apply(lambda time: 'WeeHours' if time < 4 else ('EarlyMorning' if time < 8 else ('MidMorning' if time < 12 else('Afternoon' if time < 16 else('Evening' if time < 20 else 'Night')))))
+ 
     
     return master
