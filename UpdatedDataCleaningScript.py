@@ -17,6 +17,18 @@ def clean_array(substrs):
             cleaned_substr.append(int(substr))
     return cleaned_substr
 
+def isOverConfident(IsCorrect, Confidence):
+    if IsCorrect == 0 and Confidence >= 75:
+        return 1
+    else:
+        return 0
+    
+def isUnderConfident(IsCorrect, Confidence):
+    if IsCorrect == 1 and Confidence <= 25:
+        return 1
+    else:
+        return 0
+
 def stringToDate(string):
     # Tom's function :) - cleans string to a date
     if type(string) != str:
@@ -48,17 +60,21 @@ def cleanData():
     # extracts the time answered from the date answered for easier analysis
     master['TimeAnswered'] = master['DateAnswered'].apply(lambda x: x.time())
 
-    fouram = stringToDate('2030-01-01 04:00:00.000').time()
-    eightam = stringToDate('2030-01-01 08:00:00.000').time()
-    twelvepm = stringToDate('2030-01-01 12:00:00.000').time()
-    fourpm = stringToDate('2030-01-01 16:00:00.000').time()
-    eightpm = stringToDate('2030-01-01 20:00:00.000').time()
     
     master['HourAnswered'] = master['TimeAnswered'].apply(lambda x: x.hour)
 
 
     #Creates an indicator variable about what time of day the question was answered - Welcome to change to whatever time brackets
     master['TimeSlot'] = master['HourAnswered'].apply(lambda time: 'WeeHours' if time < 4 else ('EarlyMorning' if time < 8 else ('MidMorning' if time < 12 else('Afternoon' if time < 16 else('Evening' if time < 20 else 'Night')))))
+    
+    master['WeeHours'] = master['HourAnswered'].apply(lambda time: time < 4)
+    master['EarlyMorning'] = master['HourAnswered'].apply(lambda time: time >= 4 and time < 8)
+    master['MidMorning'] = master['HourAnswered'].apply(lambda time: time >= 8 and time < 12)
+    master['Afternoon'] = master['HourAnswered'].apply(lambda time: time >= 12 and time < 16)
+    master['Evening'] = master['HourAnswered'].apply(lambda time: time >= 16 and time < 20)
+    master['Night'] = master['HourAnswered'].apply(lambda time: time >= 20)
  
+    master['Overconfidence'] = master.apply(lambda row: isOverConfident(row['IsCorrect'], row['Confidence']), axis = 1)
+    master['Underconfidence'] = master.apply(lambda row: isUnderConfident(row['IsCorrect'], row['Confidence']), axis = 1)
     
     return master
