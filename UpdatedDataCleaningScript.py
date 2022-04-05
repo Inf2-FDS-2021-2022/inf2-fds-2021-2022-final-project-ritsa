@@ -62,6 +62,11 @@ def cleanData():
 
     
     master['HourAnswered'] = master['TimeAnswered'].apply(lambda x: x.hour)
+    
+    master['Age'] = master.apply(lambda row : (row['DateAnswered']- row['DateOfBirth']).days // 365.25, axis = 1)
+    
+    # only loosing 116 records from 1.3 million
+    master = master[master['Age'] < 20]
 
 
     #Creates an indicator variable about what time of day the question was answered - Welcome to change to whatever time brackets
